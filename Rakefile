@@ -1,7 +1,22 @@
-require File.join(File.dirname(__FILE__), 'config', 'rake')
+if File.exists? File.join(File.dirname(__FILE__), 'config', 'rake.rb') 
+  require File.join(File.dirname(__FILE__), 'config', 'rake')
+else 
+  HOST = "undefined"
+  puts "You need to do 'rake init_drive_thru' before anything else will work\n"
+end
 load 'sprinkle_chef/Rakefile'
 load 'lib/dns.rb'
 load 'lib/chef-repo.rb'
+
+desc "Create various default versions from templates"
+task :init_drive_thru do
+  ["site-cookbooks", "config"].each do |dir|
+    src = File.join(File.dirname(__FILE__), "drive-thru-templates", dir)
+    dest = File.join(File.dirname(__FILE__), dir)
+    FileUtils.cp_r src, dest
+    puts "initialized templates - now fill in the right data\n"
+  end
+end
 
 desc "Create dna.json from dna.rb file"
 task :create_dna  do
