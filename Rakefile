@@ -10,12 +10,13 @@ load 'lib/chef-repo.rb'
 
 desc "Create various default versions from templates"
 task :init_drive_thru do
-  ["site-cookbooks", "config"].each do |dir|
-    src = File.join(File.dirname(__FILE__), "drive-thru-templates", dir)
-    dest = File.join(File.dirname(__FILE__), dir)
-    FileUtils.cp_r src, dest
-    puts "initialized templates - now fill in the right data\n"
-  end
+  config_src = File.join(File.dirname(__FILE__), "drive-thru-templates", 'config')
+  config_dest = File.join(File.dirname(__FILE__), 'config')
+  FileUtils.cp_r config_src, config_dest
+  site_modules_src = File.join(config_dest, 'site-cookbooks')
+  site_modules_dest = File.join(File.dirname(__FILE__), 'site-cookbooks')
+  FileUtils.ln_s site_modules_src, site_modules_dest
+  puts "initialized templates - now fill in the right data and do git init within config\n"
 end
 
 desc "Create dna.json from dna.rb file"
