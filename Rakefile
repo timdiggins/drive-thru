@@ -26,10 +26,29 @@ task :create_dna  do
   sh "ruby #{dna_file}"
 end
 
-task :update_config => :create_dna do
+task :update_config => [:update_drive_thru_info,:create_dna] do
   remote("mkdir -p /etc/chef")
   sh "#{RSYNC} #{TOPDIR}/config/* #{HOST_LOGIN}:/etc/chef/"
   File.delete(File.dirname(__FILE__) + "/config/dna.json")
+end
+
+def git_version
+    'git log -1 --format=oneline'
+end
+
+task :update_drive_thru_info do
+  drive_thru_version = File.join(File.dirname(__FILE__), "config", "drive_thru_version.txt")
+  File.delete(drive_thru_version) if File.exists? drive_thru_version
+  [
+    "echo '# #{git_version}:\n'",
+    "#{git_version}",
+    "echo '\n\n# git submodules (.gitmodules):\n'",
+    "cat #{File.join(File.dirname(__FILE__), ".gitmodules")}",
+    "echo '\n\n#git submodule status:\n'",
+    "git submodule status"
+    ].each do |cmd|
+      sh "#{cmd} >> #{drive_thru_version}"
+  end
 end
 
 desc "rsync the cookbooks to #{HOST}"
